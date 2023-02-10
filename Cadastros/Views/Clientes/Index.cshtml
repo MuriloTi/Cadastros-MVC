@@ -1,0 +1,200 @@
+﻿@model Cadastros.Application.ViewModels.ClientesViewModel
+
+<h1>Clientes (@Model.Clientes.Count)</h1>
+
+<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#Create">
+    Novo Cliente
+</button>
+
+<br/>
+
+@if (ViewData["msg"] != null)
+{
+    <br />
+    if (ViewData["msg"].ToString() == "1")
+    {
+        <strong class="text-success">
+            Cliente cadastrado com sucesso.
+        </strong>
+    }
+    else if (ViewData["msg"].ToString() == "2")
+    {
+        <strong class="text-success">
+            Cliente alterado com sucesso.
+        </strong>
+    }
+    else if (ViewData["msg"].ToString() == "3")
+    {
+        <strong class="text-success">
+            Cliente removido com sucesso.
+        </strong>
+    }
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Cidade</th>
+            <th>Endereço</th>
+            <th>Telefone</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var cliente in Model.Clientes)
+        {
+            <tr>
+                <td>@cliente.Id</td>
+                <td>@cliente.Codigo</td>
+                <td>@cliente.Nome</td>
+                <td>@cliente.Cidade - @cliente.UF</td>
+                <td>@cliente.GetEnderecoCompleto()</td>
+                <td>@cliente.Telefone</td>
+                <td>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="@("#Editar" + cliente.Id)">
+                        Editar
+                    </button>
+                    <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@cliente.Id">
+                        Remover
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="Create" tabindex="-1" role="dialog" aria-labelledby="CreateModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="Create">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="CreateModal">Novo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">Código</label>
+                        <input asp-for="Codigo" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Codigo"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Nome</label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Nome"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Endereço</label>
+                        <input asp-for="Endereco" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Endereco"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Bairro</label>
+                        <input asp-for="Bairro" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Bairro"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Cidade</label>
+                        <select asp-for="CidadeId" class="form-select" asp-items="ViewBag.Cidades"></select>
+                        <span class="text-danger" asp-validation-for="CidadeId"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">CEP</label>
+                        <input asp-for="CEP" class="form-control" maxlength="9" oninput="MascaraCEP(this)" />
+                        <span class="text-danger" asp-validation-for="CEP"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Telefone</label>
+                        <input asp-for="Telefone" class="form-control" maxlength="15" oninput="MascaraTelefone(this)"  />
+                        <span class="text-danger" asp-validation-for="Telefone"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                        Voltar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@foreach (var cliente in Model.Clientes)
+{
+    <div class="modal fade" id="@("Editar" + cliente.Id)" tabindex="-1" role="dialog" aria-labelledby="@("EditarModal" + cliente.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="Update">
+                    <input type="hidden" name="Id" value="@cliente.Id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="CreateModal">Editar Cliente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Código</label>
+                            <input type="text" name="Codigo" value="@cliente.Codigo" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Nome</label>
+                            <input type="text" name="Nome" value="@cliente.Nome" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Endereço</label>
+                            <input type="text" name="Endereco" value="@cliente.Endereco" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Bairro</label>
+                            <input type="text" name="Bairro" value="@cliente.Bairro" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Cidade</label>
+                            <select name="CidadeId" class="form-select">
+                                @foreach (var cidade in Model.Cidades)
+                                {
+                                    if (cidade.Id == cliente.CidadeId)
+                                    {
+                                        <option value="@cidade.Id" selected>@cidade.Nome</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@cidade.Id">@cidade.Nome</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">CEP</label>
+                            <input type="text" name="CEP" value="@cliente.CEP" class="form-control" maxlength="9" oninput="MascaraCEP(this)" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Telefone</label>
+                            <input type="text" name="Telefone" value="@cliente.Telefone" class="form-control" maxlength="15" oninput="MascaraTelefone(this)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                            Voltar
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

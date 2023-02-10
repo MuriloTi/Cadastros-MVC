@@ -1,0 +1,198 @@
+﻿@model Cadastros.Application.ViewModels.CidadesViewModel
+
+<h1>Cidades (@Model.Cidades.Count)</h1>
+
+<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#Create">
+    Nova Cidade
+</button>
+
+<br/>
+
+@if (ViewData["msg"] != null)
+{
+    <br />
+    if (ViewData["msg"].ToString() == "1")
+    {
+        <strong class="text-success">
+            Cidade cadastrada com sucesso.
+        </strong>
+    }
+    else if (ViewData["msg"].ToString() == "2")
+    {
+        <strong class="text-success">
+            Cidade alterada com sucesso.
+        </strong>
+    }
+    else if (ViewData["msg"].ToString() == "3")
+    {
+        <strong class="text-danger">
+            Existe cliente cadastrado para essa cidade. Deve-se alterar o cadastro do cliente antes de remover a cidade.
+        </strong>
+    }
+    else if (ViewData["msg"].ToString() == "4")
+    {
+        <strong class="text-success">
+            Cidade removida com sucesso.
+        </strong>
+    }
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>UF</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var cidade in Model.Cidades)
+        {
+            <tr>
+                <td>@cidade.Id</td>
+                <td>@cidade.Codigo</td>
+                <td>@cidade.Nome</td>
+                <td>@cidade.UF</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="@("#Clientes" + cidade.Id)">
+                        Clientes
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="@("#Editar" + cidade.Id)">
+                        Editar
+                    </button>
+                    <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@cidade.Id">
+                        Remover
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="Create" tabindex="-1" role="dialog" aria-labelledby="CreateModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="Create">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="CreateModal">Nova Cidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">Código</label>
+                        <input asp-for="Codigo" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Codigo"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Nome</label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Nome"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">UF</label>
+                        <input asp-for="UF" class="form-control" />
+                        <span class="text-danger" asp-validation-for="UF"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                        Voltar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@foreach (var cidade in Model.Cidades)
+{
+    <div class="modal fade" id="@("Clientes" + cidade.Id)" tabindex="-1" role="dialog" aria-labelledby="@("ClientesModal" + cidade.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="@("ClientesModal" + cidade.Id)">Clientes @cidade.Nome - @cidade.UF (@cidade.Clientes.Count)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Endereço</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cliente in cidade.Clientes)
+                            {
+                                <tr>
+                                    <td>@cliente.Nome</td>
+                                    <td>@cliente.GetEnderecoCompleto()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                        Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="@("Editar" + cidade.Id)" tabindex="-1" role="dialog" aria-labelledby="@("EditarModal" + cidade.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="Update">
+                    <input type="hidden" name="Id" value="@cidade.Id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="CreateModal">Editar Cidade</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Código</label>
+                            <input type="text" name="Codigo" value="@cidade.Codigo" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Nome</label>
+                            <input type="text" name="Nome" value="@cidade.Nome" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">UF</label>
+                            <input type="text" name="UF" value="@cidade.UF" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                            Voltar
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+                    
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
